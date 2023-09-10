@@ -1,12 +1,12 @@
 name: CI
 
-# Controls when the action will run. 
+# Controls when the action will run.
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
   push:
-    branches: [ "dev","main","hotfix" ]
+    branches: ["dev", "main", "hotfix"]
   pull_request:
-    branches: [ "dev","main","hotfix" ]
+    branches: ["dev", "main", "hotfix"]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -36,7 +36,7 @@ jobs:
       #     cd ../../../
       #     git config --global user.name 'github-bot'
       #     git config --global user.email 'github-bot@users.noreply.github.com'
-      #     git tag v$patchVersion 
+      #     git tag v$patchVersion
       #     git push origin --tags
       #   env:
       #     PKG_ROOT: Packages/com.suucha.unity.core
@@ -69,6 +69,7 @@ jobs:
         run: |
           git push origin --delete upm_${GITHUB_REF##*/} &> /dev/null || echo upm_${GITHUB_REF##*/} branch not found
           git subtree split -P "$PKG_ROOT" -b upm_${GITHUB_REF##*/}
+          git checkout upm_${GITHUB_REF##*/}
           if [[ -d "Documentation" ]]; then
             git mv Documentation Documentation~
             rm -f Documentation.meta
@@ -76,7 +77,7 @@ jobs:
             git config --global user.email 'github-bot@users.noreply.github.com'
             git commit -am "rename: Documentation => Documentation~"
           fi
-          if [[ -d "./Samples" ]]; then
+          if [[ -d "Samples" ]]; then
             git mv Samples Samples~
             rm -f Samples.meta
             git config --global user.name 'github-bot'
@@ -128,17 +129,17 @@ jobs:
       #     NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
 
       # - name: change beta version
-        # if: github.ref == 'refs/heads/dev'
-        # run: |
-        #   git config --global user.name 'github-bot'
-        #   git config --global user.email 'github-bot@users.noreply.github.com'
-        #   git checkout dev
-        #   git pull
-        #   cd $PKG_ROOT
-        #   patchVersion=$(npm version prerelease --preid=beta | grep -P '\d+(.\d+)*-beta(.\d+)*' -o)
-        #   cd ../../../
-        #   git add .
-        #   git commit -m "Change beta version to $patchVersion"
-        #   git push -f &> /dev/null || echo $?
-        # env:
-        #   PKG_ROOT: Packages/com.suucha.unity.core
+      # if: github.ref == 'refs/heads/dev'
+      # run: |
+      #   git config --global user.name 'github-bot'
+      #   git config --global user.email 'github-bot@users.noreply.github.com'
+      #   git checkout dev
+      #   git pull
+      #   cd $PKG_ROOT
+      #   patchVersion=$(npm version prerelease --preid=beta | grep -P '\d+(.\d+)*-beta(.\d+)*' -o)
+      #   cd ../../../
+      #   git add .
+      #   git commit -m "Change beta version to $patchVersion"
+      #   git push -f &> /dev/null || echo $?
+      # env:
+      #   PKG_ROOT: Packages/com.suucha.unity.core
