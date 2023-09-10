@@ -1,0 +1,144 @@
+name: CI
+
+# Controls when the action will run. 
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ "dev","main","hotfix" ]
+  pull_request:
+    branches: [ "dev","main","hotfix" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  split-upm:
+    name: split upm branch
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 14
+          registry-url: https://registry.npmjs.org/
+      # Runs a single command using the runners shell
+      # - name: change version
+      #   if: github.ref == 'refs/heads/main'
+      #   run: |
+      #     cd $PKG_ROOT
+      #     patchVersion=$(cat package.json | grep -P '\"version\":( )*\"\d+(.\d+)*\"' -o | grep -P '\d+(.\d+)*' -o)
+      #     cd ../../../
+      #     git config --global user.name 'github-bot'
+      #     git config --global user.email 'github-bot@users.noreply.github.com'
+      #     git tag v$patchVersion 
+      #     git push origin --tags
+      #   env:
+      #     PKG_ROOT: Packages/com.suucha.unity.core
+
+      # - name: change beta version if need
+      #   if: github.ref == 'refs/heads/dev'
+      #   run: |
+      #     git fetch
+      #     git config --global user.name 'github-bot'
+      #     git config --global user.email 'github-bot@users.noreply.github.com'
+      #     git config --global pull.rebase true
+      #     git pull
+      #     cd $PKG_ROOT
+      #     patchVersion=$(cat package.json | grep -P '\"version\":( )*\"\d+(.\d+)*-beta(.\d+)*\"' -o | grep -P '\d+(.\d+)*-beta(.\d+)*' -o) &> /dev/null || echo $?
+      #     if [ "$patchVersion" ]
+      #     then
+      #       cd ../../../
+      #     else
+      #       echo "Change beta version"
+      #       patchVersion=$(npm version prepatch --preid=beta | grep -P '\d+(.\d+)*-beta(.\d+)*' -o)
+      #       cd ../../../
+      #       git add .
+      #       git commit -m "change version to $patchVersion"
+      #       git push -f &> /dev/null || echo $?
+      #     fi
+      #   env:
+      #     PKG_ROOT: Packages/com.suucha.unity.core
+
+      - name: UPM Split
+        run: |
+          git push origin --delete upm_${GITHUB_REF##*/} &> /dev/null || echo upm_${GITHUB_REF##*/} branch not found
+          git subtree split -P "$PKG_ROOT" -b upm_${GITHUB_REF##*/}
+          if [[ -d "Documentation" ]]; then
+            git mv Documentation Documentation~
+            rm -f Documentation.meta
+            git config --global user.name 'github-bot'
+            git config --global user.email 'github-bot@users.noreply.github.com'
+            git commit -am "rename: Documentation => Documentation~"
+          fi
+          if [[ -d "./Samples" ]]; then
+            git mv Samples Samples~
+            rm -f Samples.meta
+            git config --global user.name 'github-bot'
+            git config --global user.email 'github-bot@users.noreply.github.com'
+            git commit -am "rename: Samples => Samples~"
+          fi
+          git push -u origin upm_${GITHUB_REF##*/}
+        env:
+          PKG_ROOT: Packages/com.suucha.unity.core
+
+      # - name: npm publish
+      #   if: github.ref == 'refs/heads/main'
+      #   run: |
+      #     git config --global user.name 'github-bot'
+      #     git config --global user.email 'github-bot@users.noreply.github.com'
+      #     git checkout upm_main
+      #     patchVersion=$(cat package.json | grep -P '\"version\":( )*\"\d+(.\d+)*\"' -o | grep -P '\d+(.\d+)*' -o)
+      #     git tag upm$patchVersion
+      #     git push origin --tags
+      #     npm publish . --access public
+      #   env:
+      #     NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+
+      # - name: merge branch dev
+      #   if: github.ref == 'refs/heads/main'
+      #   run: |
+      #     git config --global user.name 'github-bot'
+      #     git config --global user.email 'github-bot@users.noreply.github.com'
+      #     git pull
+      #     git checkout dev
+      #     git pull
+      #     git merge ${GITHUB_REF##*/} --allow-unrelated-histories --strategy-option theirs
+      #     cd $PKG_ROOT
+      #     patchVersion=$(npm version patch | grep -P '\d+(.\d+)*' -o)
+      #     cd ../../../
+      #     git add .
+      #     git commit -m "Change version to $patchVersion"
+      #     git push -f &> /dev/null || echo $?
+      #   env:
+      #     PKG_ROOT: Packages/com.suucha.unity.core
+
+      # - name: npm publish beta
+      #   if: github.ref == 'refs/heads/dev'
+      #   run: |
+      #     git checkout upm_dev
+      #     git pull
+      #     npm publish . --tag beta --access public
+      #   env:
+      #     NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+
+      # - name: change beta version
+        # if: github.ref == 'refs/heads/dev'
+        # run: |
+        #   git config --global user.name 'github-bot'
+        #   git config --global user.email 'github-bot@users.noreply.github.com'
+        #   git checkout dev
+        #   git pull
+        #   cd $PKG_ROOT
+        #   patchVersion=$(npm version prerelease --preid=beta | grep -P '\d+(.\d+)*-beta(.\d+)*' -o)
+        #   cd ../../../
+        #   git add .
+        #   git commit -m "Change beta version to $patchVersion"
+        #   git push -f &> /dev/null || echo $?
+        # env:
+        #   PKG_ROOT: Packages/com.suucha.unity.core
