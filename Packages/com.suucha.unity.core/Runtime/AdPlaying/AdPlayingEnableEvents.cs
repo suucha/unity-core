@@ -4,7 +4,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
     /// <summary>
     /// 
     /// </summary>
-    public enum AdPlayingEnablePlacementEvents
+    public enum AdPlayingEnableEvents
     {
         /// <summary>
         /// The rewarded video clicked

@@ -1,4 +1,5 @@
 ﻿using SuuchaStudio.Unity.Core.AdPlaying;
+using System.Collections.Generic;
 
 namespace SuuchaStudio.Unity.Core
 {
@@ -21,13 +22,13 @@ namespace SuuchaStudio.Unity.Core
         /// </summary>
         /// <param name="enablePlacementEvents">The enable placement events.</param>
         /// <returns></returns>
-        public Suucha EnableAdPlayingEvent(params AdPlayingEnablePlacementEvents[] enablePlacementEvents)
+        public Suucha EnableAdPlayingEvent(List<AdPlayingEnableEvents> enableEvents = null, List<AdPlayingEnableEvents> enablePlacementEvents = null)
         {
             if(suuchaAdPlaying == null)
             {
                 throw new System.InvalidOperationException("Please call EnableAdPlaying first.");
             }
-            suuchaAdPlaying.EnableAdPlayingEvent(enablePlacementEvents);
+            suuchaAdPlaying.EnableAdPlayingEvent(enableEvents, enablePlacementEvents);
             return this;
         }
         /// <summary>

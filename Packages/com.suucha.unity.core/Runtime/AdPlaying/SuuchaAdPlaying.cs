@@ -12,7 +12,8 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
     {
         bool isInitialled = false;
         bool enableLogEvent = false;
-        List<AdPlayingEnablePlacementEvents> enablePlacementEvents;
+        List<AdPlayingEnableEvents> enablePlacementEvents;
+        List<AdPlayingEnableEvents> enableEvents;
         private readonly IAdPlayerManager adPlayerManager;
         IAdPlayingStrategy adPlayingStrategy;
 
@@ -100,7 +101,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
         #region Banner events
         async void BannerPlayerOnRevenuePaidInternal(string adUnitId, AdCallbackInfo adCallbackInfo)
         {
-            if (enableLogEvent && !string.IsNullOrEmpty(AdPlayingEventNames.BannerRevenuePaid))
+            if (enableLogEvent &&  enableEvents.Contains(AdPlayingEnableEvents.BannerRevenuePaid))
             {
                 await LogEventManager.LogEvent($"{AdPlayingEventNames.BannerRevenuePaid}",
                      new Dictionary<string, string> {
@@ -112,7 +113,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
                          { AdPlayingEventNames.RevenuePaidEventParameterName,adCallbackInfo.Revenue.ToString("F10",CultureInfo.InvariantCulture) }
                      });
                 if (!string.IsNullOrEmpty(adCallbackInfo.Placement)
-                    && enablePlacementEvents.Contains(AdPlayingEnablePlacementEvents.BannerRevenuePaid))
+                    && enablePlacementEvents.Contains(AdPlayingEnableEvents.BannerRevenuePaid))
                 {
                     await LogEventManager.LogEvent($"{AdPlayingEventNames.BannerRevenuePaid}_{adCallbackInfo.Placement}",
                          new Dictionary<string, string> {
@@ -137,7 +138,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
 
         async void BannerPlayerOnLoadedInternal(string adUnitId, AdCallbackInfo adCallbackInfo)
         {
-            if (enableLogEvent && !string.IsNullOrEmpty(AdPlayingEventNames.BannerLoaded))
+            if (enableLogEvent && enableEvents.Contains(AdPlayingEnableEvents.BannerLoaded))
             {
                 await LogEventManager.LogEvent($"{AdPlayingEventNames.BannerLoaded}",
                     new Dictionary<string, string> {
@@ -146,7 +147,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
                         { EventParameterNames.AdPlacement, adCallbackInfo.Placement },
                         { AdPlayingEventNames.RevenuePaidEventParameterName,adCallbackInfo.Revenue.ToString("F10",CultureInfo.InvariantCulture) } });
                 if (!string.IsNullOrEmpty(adCallbackInfo.Placement)
-                    && enablePlacementEvents.Contains(AdPlayingEnablePlacementEvents.BannerLoaded))
+                    && enablePlacementEvents.Contains(AdPlayingEnableEvents.BannerLoaded))
                 {
                     await LogEventManager.LogEvent($"{AdPlayingEventNames.BannerLoaded}_{adCallbackInfo.Placement}",
                          new Dictionary<string, string> {
@@ -168,7 +169,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
 
         async void BannerPlayerOnLoadFailedInternal(string adUnitId, string errorMessage)
         {
-            if (enableLogEvent && !string.IsNullOrEmpty(AdPlayingEventNames.BannerLoadFailed))
+            if (enableLogEvent && enableEvents.Contains(AdPlayingEnableEvents.BannerLoaded))
             {
                 await LogEventManager.LogEvent($"{AdPlayingEventNames.BannerLoadFailed}",
                      new Dictionary<string, string> {
@@ -187,7 +188,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
 
         async void BannerPlayerOnClickedInternal(string adUnitId, AdCallbackInfo adCallbackInfo)
         {
-            if (enableLogEvent && !string.IsNullOrEmpty(AdPlayingEventNames.BannerClicked))
+            if (enableLogEvent && enableEvents.Contains(AdPlayingEnableEvents.BannerClicked))
             {
                 await LogEventManager.LogEvent($"{AdPlayingEventNames.BannerClicked}",
                      new Dictionary<string, string> {
@@ -196,7 +197,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
                          { EventParameterNames.AdPlacement, adCallbackInfo.Placement },
                          { AdPlayingEventNames.RevenuePaidEventParameterName,adCallbackInfo.Revenue.ToString("F10",CultureInfo.InvariantCulture) } });
                 if (!string.IsNullOrEmpty(adCallbackInfo.Placement)
-                    && enablePlacementEvents.Contains(AdPlayingEnablePlacementEvents.BannerClicked))
+                    && enablePlacementEvents.Contains(AdPlayingEnableEvents.BannerClicked))
                 {
                     await LogEventManager.LogEvent($"{AdPlayingEventNames.BannerClicked}_{adCallbackInfo.Placement}",
                         new Dictionary<string, string> {
@@ -219,7 +220,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
         #region Interstitial video events
         async void InterstitialVideoPlayerOnRevenuePaidInternal(string adUnitId, AdCallbackInfo adCallbackInfo)
         {
-            if (enableLogEvent && !string.IsNullOrEmpty(AdPlayingEventNames.InterstitialVideoRevenuePaid))
+            if (enableLogEvent && enableEvents.Contains(AdPlayingEnableEvents.InterstitialVideoRevenuePaid))
             {
                 await LogEventManager.LogEvent($"{AdPlayingEventNames.InterstitialVideoRevenuePaid}",
                      new Dictionary<string, string> {
@@ -231,7 +232,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
                          { AdPlayingEventNames.RevenuePaidEventParameterName,adCallbackInfo.Revenue.ToString("F10",CultureInfo.InvariantCulture) }
                      });
                 if (!string.IsNullOrEmpty(adCallbackInfo.Placement)
-                    && enablePlacementEvents.Contains(AdPlayingEnablePlacementEvents.InterstitialVideoRevenuePaid))
+                    && enablePlacementEvents.Contains(AdPlayingEnableEvents.InterstitialVideoRevenuePaid))
                 {
                     await LogEventManager.LogEvent($"{AdPlayingEventNames.InterstitialVideoRevenuePaid}_{adCallbackInfo.Placement}",
                      new Dictionary<string, string> {
@@ -256,7 +257,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
 
         async void InterstitialVideoPlayerOnLoadedInternal(string adUnitId, AdCallbackInfo adCallbackInfo)
         {
-            if (enableLogEvent && !string.IsNullOrEmpty(AdPlayingEventNames.InterstitialVideoLoaded))
+            if (enableLogEvent && enableEvents.Contains(AdPlayingEnableEvents.InterstitialVideoLoaded))
             {
                 await LogEventManager.LogEvent($"{AdPlayingEventNames.InterstitialVideoLoaded}",
                      new Dictionary<string, string> {
@@ -265,7 +266,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
                          { EventParameterNames.AdPlacement, adCallbackInfo.Placement },
                          { AdPlayingEventNames.RevenuePaidEventParameterName,adCallbackInfo.Revenue.ToString("F10",CultureInfo.InvariantCulture) } });
                 if (!string.IsNullOrEmpty(adCallbackInfo.Placement) &&
-                    enablePlacementEvents.Contains(AdPlayingEnablePlacementEvents.InterstitialVideoLoaded))
+                    enablePlacementEvents.Contains(AdPlayingEnableEvents.InterstitialVideoLoaded))
                 {
                     await LogEventManager.LogEvent($"{AdPlayingEventNames.InterstitialVideoLoaded}_{adCallbackInfo.Placement}",
                          new Dictionary<string, string> {
@@ -288,7 +289,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
 
         async void InterstitialVideoPlayerOnFailedToPlayInternal(string adUnitId, string errorMessage, string placement)
         {
-            if (enableLogEvent && !string.IsNullOrEmpty(AdPlayingEventNames.InterstitialVideoShowFailed))
+            if (enableLogEvent && enableEvents.Contains(AdPlayingEnableEvents.InterstitialVideoShowFailed))
             {
                 await LogEventManager.LogEvent($"{AdPlayingEventNames.InterstitialVideoShowFailed}",
                      new Dictionary<string, string> {
@@ -296,7 +297,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
                          { EventParameterNames.AdType, "interstitial" },
                          { EventParameterNames.AdPlacement, placement } });
                 if (!string.IsNullOrEmpty(placement) &&
-                    enablePlacementEvents.Contains(AdPlayingEnablePlacementEvents.InterstitialVideoShowFailed))
+                    enablePlacementEvents.Contains(AdPlayingEnableEvents.InterstitialVideoShowFailed))
                 {
                     await LogEventManager.LogEvent($"{AdPlayingEventNames.InterstitialVideoShowFailed}",
                      new Dictionary<string, string> {
@@ -317,7 +318,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
 
         async void InterstitialVideoPlayerOnLoadFailedInternal(string adUnitId, string errorMessage)
         {
-            if (enableLogEvent && !string.IsNullOrEmpty(AdPlayingEventNames.InterstitialVideoLoadFailed))
+            if (enableLogEvent && enableEvents.Contains(AdPlayingEnableEvents.InterstitialVideoLoadFailed))
             {
                 await LogEventManager.LogEvent($"{AdPlayingEventNames.InterstitialVideoLoadFailed}",
                      new Dictionary<string, string> {
@@ -336,7 +337,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
 
         async void InterstitialVideoPlayerOnClickedInternal(string adUnitId, AdCallbackInfo adCallbackInfo)
         {
-            if (enableLogEvent && !string.IsNullOrEmpty(AdPlayingEventNames.InterstitialVideoClicked))
+            if (enableLogEvent && enableEvents.Contains(AdPlayingEnableEvents.InterstitialVideoClicked))
             {
                 await LogEventManager.LogEvent($"{AdPlayingEventNames.InterstitialVideoClicked}",
                  new Dictionary<string, string> {
@@ -345,7 +346,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
                      { EventParameterNames.AdPlacement, adCallbackInfo.Placement },
                      { AdPlayingEventNames.RevenuePaidEventParameterName,adCallbackInfo.Revenue.ToString("F10",CultureInfo.InvariantCulture) } });
                 if (!string.IsNullOrEmpty(adCallbackInfo.Placement) &&
-                    enablePlacementEvents.Contains(AdPlayingEnablePlacementEvents.InterstitialVideoClicked))
+                    enablePlacementEvents.Contains(AdPlayingEnableEvents.InterstitialVideoClicked))
                 {
                     await LogEventManager.LogEvent($"{AdPlayingEventNames.InterstitialVideoClicked}_{adCallbackInfo.Placement}",
                      new Dictionary<string, string> {
@@ -366,7 +367,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
         }
         async void InterstitialVideoPlayerOnDismissedInternal(string adUnitId, AdCallbackInfo adCallbackInfo)
         {
-            if (enableLogEvent && !string.IsNullOrEmpty(AdPlayingEventNames.InterstitialVideoDismissed))// enableEvents.Contains(AdPlayingEnableEvents.InterstitialVideoDismissed))
+            if (enableLogEvent && enableEvents.Contains(AdPlayingEnableEvents.InterstitialVideoDismissed))
             {
                 await LogEventManager.LogEvent($"{AdPlayingEventNames.InterstitialVideoDismissed}",
                     new Dictionary<string, string> {
@@ -374,7 +375,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
                         { EventParameterNames.AdPlacement, adCallbackInfo.Placement },
                         { AdPlayingEventNames.RevenuePaidEventParameterName,adCallbackInfo.Revenue.ToString("F10",CultureInfo.InvariantCulture) }  });
                 if (!string.IsNullOrEmpty(adCallbackInfo.Placement) &&
-                    enablePlacementEvents.Contains(AdPlayingEnablePlacementEvents.InterstitialVideoDismissed))
+                    enablePlacementEvents.Contains(AdPlayingEnableEvents.InterstitialVideoDismissed))
                 {
                     await LogEventManager.LogEvent($"{AdPlayingEventNames.InterstitialVideoDismissed}_{adCallbackInfo.Placement}",
                         new Dictionary<string, string> {
@@ -394,14 +395,14 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
         }
         async void InterstitialVideoPlayerOnShownInternal(string adUnitId, AdCallbackInfo adCallbackInfo)
         {
-            if (enableLogEvent && !string.IsNullOrEmpty(AdPlayingEventNames.InterstitialVideoShown))
+            if (enableLogEvent && enableEvents.Contains(AdPlayingEnableEvents.InterstitialVideoShown))
             {
                 await LogEventManager.LogEvent($"{AdPlayingEventNames.InterstitialVideoShown}",
                     new Dictionary<string, string> {
                         { EventParameterNames.AdUnitId, adUnitId } ,
                         { EventParameterNames.AdPlacement, adCallbackInfo.Placement },
                         { AdPlayingEventNames.RevenuePaidEventParameterName,adCallbackInfo.Revenue.ToString("F10",CultureInfo.InvariantCulture) }  });
-                if (!string.IsNullOrEmpty(adCallbackInfo.Placement) && enablePlacementEvents.Contains(AdPlayingEnablePlacementEvents.InterstitialVideoShown))
+                if (!string.IsNullOrEmpty(adCallbackInfo.Placement) && enablePlacementEvents.Contains(AdPlayingEnableEvents.InterstitialVideoShown))
                 {
                     await LogEventManager.LogEvent($"{AdPlayingEventNames.InterstitialVideoShown}_{adCallbackInfo.Placement}",
                     new Dictionary<string, string> {
@@ -421,7 +422,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
         }
         async void InterstitialVideoPlayerOnCompletedInternal(string adUnitId, AdCallbackInfo adCallbackInfo)
         {
-            if (enableLogEvent && !string.IsNullOrEmpty(AdPlayingEventNames.InterstitialVideoCompleted))
+            if (enableLogEvent && enableEvents.Contains(AdPlayingEnableEvents.InterstitialVideoCompleted))
             {
                 await LogEventManager.LogEvent($"{AdPlayingEventNames.InterstitialVideoCompleted}",
                     new Dictionary<string, string> {
@@ -429,7 +430,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
                         { EventParameterNames.AdPlacement, adCallbackInfo.Placement },
                         { AdPlayingEventNames.RevenuePaidEventParameterName,adCallbackInfo.Revenue.ToString("F10",CultureInfo.InvariantCulture) } });
                 if (!string.IsNullOrEmpty(adCallbackInfo.Placement) &&
-                    enablePlacementEvents.Contains(AdPlayingEnablePlacementEvents.InterstitialVideoCompleted))
+                    enablePlacementEvents.Contains(AdPlayingEnableEvents.InterstitialVideoCompleted))
                 {
                     await LogEventManager.LogEvent($"{AdPlayingEventNames.InterstitialVideoCompleted}_{adCallbackInfo.Placement}",
                         new Dictionary<string, string> {
@@ -451,7 +452,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
         #region Rewarded video events
         async void RewardedVideoPlayerOnShownInternal(string adUnitId, AdCallbackInfo adCallbackInfo)
         {
-            if (enableLogEvent && !string.IsNullOrEmpty(AdPlayingEventNames.RewardedVideoShown))
+            if (enableLogEvent && enableEvents.Contains(AdPlayingEnableEvents.RewardedVideoShown))
             {
                 await LogEventManager.LogEvent($"{AdPlayingEventNames.RewardedVideoShown}",
                     new Dictionary<string, string> {
@@ -460,7 +461,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
                         { EventParameterNames.AdPlacement, adCallbackInfo.Placement },
                         { AdPlayingEventNames.RevenuePaidEventParameterName,adCallbackInfo.Revenue.ToString("F10",CultureInfo.InvariantCulture) } });
                 if (!string.IsNullOrEmpty(adCallbackInfo.Placement) &&
-                    enablePlacementEvents.Contains(AdPlayingEnablePlacementEvents.RewardedVideoShown))
+                    enablePlacementEvents.Contains(AdPlayingEnableEvents.RewardedVideoShown))
                 {
                     await LogEventManager.LogEvent($"{AdPlayingEventNames.RewardedVideoShown}_{adCallbackInfo.Placement}",
                          new Dictionary<string, string> {
@@ -481,7 +482,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
         }
         async void RewardedVideoPlayerOnClosedInternal(string adUnitId, AdCallbackInfo adCallbackInfo)
         {
-            if (enableLogEvent && !string.IsNullOrEmpty(AdPlayingEventNames.RewardedVideoClosed))// enableEvents.Contains(AdPlayingEnableEvents.RewardedVideoClosed))
+            if (enableLogEvent && enableEvents.Contains(AdPlayingEnableEvents.RewardedVideoClosed))
             {
                 await LogEventManager.LogEvent($"{AdPlayingEventNames.RewardedVideoClosed}",
                      new Dictionary<string, string> {
@@ -490,7 +491,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
                          { EventParameterNames.AdPlacement, adCallbackInfo.Placement },
                          { AdPlayingEventNames.RevenuePaidEventParameterName,adCallbackInfo.Revenue.ToString("F10",CultureInfo.InvariantCulture) } });
                 if (!string.IsNullOrEmpty(adCallbackInfo.Placement) &&
-                    enablePlacementEvents.Contains(AdPlayingEnablePlacementEvents.RewardedVideoClosed))
+                    enablePlacementEvents.Contains(AdPlayingEnableEvents.RewardedVideoClosed))
                 {
                     await LogEventManager.LogEvent($"{AdPlayingEventNames.RewardedVideoClosed}_{adCallbackInfo.Placement}",
                          new Dictionary<string, string> {
@@ -512,7 +513,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
         async void RewardedVideoPlayerOnRevenuePaidInternal(string adUnitId, AdCallbackInfo adCallbackInfo)
         {
 
-            if (enableLogEvent && !string.IsNullOrEmpty(AdPlayingEventNames.RewardedVideoRevenuePaid))
+            if (enableLogEvent && enableEvents.Contains(AdPlayingEnableEvents.RewardedVideoRevenuePaid))
             {
                 await LogEventManager.LogEvent($"{AdPlayingEventNames.RewardedVideoRevenuePaid}",
                      new Dictionary<string, string> {
@@ -524,7 +525,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
                          { AdPlayingEventNames.RevenuePaidEventParameterName,adCallbackInfo.Revenue.ToString("F10",CultureInfo.InvariantCulture) }
                      });
                 if (!string.IsNullOrEmpty(adCallbackInfo.Placement) &&
-                    enablePlacementEvents.Contains(AdPlayingEnablePlacementEvents.RewardedVideoRevenuePaid))
+                    enablePlacementEvents.Contains(AdPlayingEnableEvents.RewardedVideoRevenuePaid))
                 {
                     await LogEventManager.LogEvent($"{AdPlayingEventNames.RewardedVideoRevenuePaid}_{adCallbackInfo.Placement}",
                      new Dictionary<string, string> {
@@ -550,7 +551,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
         async void RewardedVideoPlayerOnLoadedInternal(string adUnitId, AdCallbackInfo adCallbackInfo)
         {
 
-            if (enableLogEvent && !string.IsNullOrEmpty(AdPlayingEventNames.RewardedVideoLoaded))
+            if (enableLogEvent && enableEvents.Contains(AdPlayingEnableEvents.RewardedVideoLoaded))
             {
                 await LogEventManager.LogEvent($"{AdPlayingEventNames.RewardedVideoLoaded}",
                      new Dictionary<string, string> {
@@ -559,7 +560,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
                          { EventParameterNames.AdPlacement, adCallbackInfo.Placement },
                          { AdPlayingEventNames.RevenuePaidEventParameterName, adCallbackInfo.Revenue.ToString("F10", CultureInfo.InvariantCulture) } });
                 if (!string.IsNullOrEmpty(adCallbackInfo.Placement) &&
-                    enablePlacementEvents.Contains(AdPlayingEnablePlacementEvents.RewardedVideoLoaded))
+                    enablePlacementEvents.Contains(AdPlayingEnableEvents.RewardedVideoLoaded))
                 {
                     await LogEventManager.LogEvent($"{AdPlayingEventNames.RewardedVideoLoaded}_{adCallbackInfo.Placement}",
                          new Dictionary<string, string> {
@@ -582,7 +583,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
         async void RewardedVideoPlayerOnShowFailedInternal(string adUnitId, string error, string placement)
         {
 
-            if (enableLogEvent && !string.IsNullOrEmpty(AdPlayingEventNames.RewardedVideoShowFailed))
+            if (enableLogEvent && enableEvents.Contains(AdPlayingEnableEvents.RewardedVideoShowFailed))
             {
                 await LogEventManager.LogEvent($"{AdPlayingEventNames.RewardedVideoShowFailed}",
                      new Dictionary<string, string> {
@@ -590,7 +591,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
                          { EventParameterNames.AdType, "rewarded" },
                          { EventParameterNames.AdPlacement, placement } });
                 if (!string.IsNullOrEmpty(placement) &&
-                    enablePlacementEvents.Contains(AdPlayingEnablePlacementEvents.RewardedVideoShowFailed))
+                    enablePlacementEvents.Contains(AdPlayingEnableEvents.RewardedVideoShowFailed))
                 {
                     await LogEventManager.LogEvent($"{AdPlayingEventNames.RewardedVideoShowFailed}_{placement}",
                      new Dictionary<string, string> {
@@ -612,7 +613,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
         async void RewardedVideoPlayerOnLoadFailedInternal(string adUnitId, string errorMessage)
         {
 
-            if (enableLogEvent && !string.IsNullOrEmpty(AdPlayingEventNames.RewardedVideoLoadFailed))// enableEvents.Contains(AdPlayingEnableEvents.RewardedVideoLoadFailed))
+            if (enableLogEvent && enableEvents.Contains(AdPlayingEnableEvents.RewardedVideoLoadFailed))
             {
                 await LogEventManager.LogEvent($"{AdPlayingEventNames.RewardedVideoLoadFailed}",
                      new Dictionary<string, string> {
@@ -632,7 +633,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
         async void RewardedVideoPlayerOnClickedInternal(string adUnitId, AdCallbackInfo adCallbackInfo)
         {
 
-            if (enableLogEvent && !string.IsNullOrEmpty(AdPlayingEventNames.RewardedVideoClicked))
+            if (enableLogEvent && enableEvents.Contains(AdPlayingEnableEvents.RewardedVideoClicked))
             {
                 await LogEventManager.LogEvent($"{AdPlayingEventNames.RewardedVideoClicked}",
                      new Dictionary<string, string> {
@@ -641,7 +642,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
                          { EventParameterNames.AdPlacement, adCallbackInfo.Placement },
                          { AdPlayingEventNames.RevenuePaidEventParameterName, adCallbackInfo.Revenue.ToString("F10", CultureInfo.InvariantCulture) } });
                 if (!string.IsNullOrEmpty(adCallbackInfo.Placement) &&
-                    enablePlacementEvents.Contains(AdPlayingEnablePlacementEvents.RewardedVideoClicked))
+                    enablePlacementEvents.Contains(AdPlayingEnableEvents.RewardedVideoClicked))
                 {
                     await LogEventManager.LogEvent($"{AdPlayingEventNames.RewardedVideoClicked}_{adCallbackInfo.Placement}",
                          new Dictionary<string, string> {
@@ -662,7 +663,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
         }
         async void RewardedVideoPlayerOnCompletedInternal(string adUnitId, AdCallbackInfo adCallbackInfo)
         {
-            if (enableLogEvent && !string.IsNullOrEmpty(AdPlayingEventNames.RewardedVideoCompleted))
+            if (enableLogEvent && enableEvents.Contains(AdPlayingEnableEvents.RewardedVideoCompleted))
             {
                 await LogEventManager.LogEvent($"{AdPlayingEventNames.RewardedVideoCompleted}",
                      new Dictionary<string, string> {
@@ -671,7 +672,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
                          { EventParameterNames.AdPlacement, adCallbackInfo.Placement },
                          { AdPlayingEventNames.RevenuePaidEventParameterName, adCallbackInfo.Revenue.ToString("F10", CultureInfo.InvariantCulture) }  });
                 if (!string.IsNullOrEmpty(adCallbackInfo.Placement) &&
-                     enablePlacementEvents.Contains(AdPlayingEnablePlacementEvents.RewardedVideoCompleted))
+                     enablePlacementEvents.Contains(AdPlayingEnableEvents.RewardedVideoCompleted))
                 {
                     await LogEventManager.LogEvent($"{AdPlayingEventNames.RewardedVideoCompleted}_{adCallbackInfo.Placement}",
                          new Dictionary<string, string> {
@@ -703,13 +704,11 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
             RequestAds();
             return isInitialled;
         }
-        public void EnableAdPlayingEvent(params AdPlayingEnablePlacementEvents[] enablePlacementEvents)
+        public void EnableAdPlayingEvent(List<AdPlayingEnableEvents> enableEvents, List<AdPlayingEnableEvents> enablePlacementEvents)
         {
             enableLogEvent = true;
-            if (enablePlacementEvents != null)
-            {
-                this.enablePlacementEvents = new List<AdPlayingEnablePlacementEvents>(enablePlacementEvents);
-            }
+            this.enableEvents = enableEvents ?? new List<AdPlayingEnableEvents>();
+            this.enablePlacementEvents = enablePlacementEvents ?? new List<AdPlayingEnableEvents>();
         }
         void RequestAds()
         {
