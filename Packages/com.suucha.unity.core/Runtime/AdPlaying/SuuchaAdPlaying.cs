@@ -96,6 +96,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
         {
             this.adPlayerManager = adPlayerManager ?? throw new ArgumentNullException("adPlayerManager");
             this.adPlayingStrategy = adPlayingStrategy ?? throw new ArgumentNullException("adPlayingStrategy");
+            InitializeAdPlayerManager();
 
         }
         #region Banner events
@@ -692,9 +693,9 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
             }
         }
         #endregion
-        public bool InitializeAdPlayerManager(IAdPlayingStrategy adPlayingStrategy)
+        private bool InitializeAdPlayerManager()
         {
-            this.adPlayingStrategy = adPlayingStrategy;
+            //this.adPlayingStrategy = adPlayingStrategy;
             if (isInitialled)
             {
                 Logger.LogWarning($"Advertising SDK has been initialized.");
