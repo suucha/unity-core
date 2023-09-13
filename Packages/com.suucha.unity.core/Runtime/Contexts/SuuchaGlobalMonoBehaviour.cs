@@ -16,13 +16,13 @@ namespace SuuchaStudio.Unity.Core
         internal Suucha Suucha { get; set; }
         internal static GameObject GameObject { get; set; }
         bool isInTick = false;
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         static void Init()
         {
             GameObject = new GameObject("SuuchaGlobalMonoBehaviour");
             DontDestroyOnLoad(GameObject);
             Global = GameObject.AddComponent<SuuchaGlobalMonoBehaviour>();
-            InitIoc();
+            //InitIoc();
 
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
             foreach (var assembly in assemblies)
@@ -39,6 +39,7 @@ namespace SuuchaStudio.Unity.Core
             }
             LogEventManager.LogEvent(SuuchaEventNames.AppStart).GetAwaiter().GetResult();
         }
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void InitIoc()
         {
             var zenjectContainer = new ZenjectContainer();

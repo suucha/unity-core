@@ -11,7 +11,10 @@ namespace SuuchaStudio.Unity.Core
     public delegate void AttributionChangedHandler(AttributionData oldData, AttributionData newData);
     public partial class Suucha
     {
-        public AttributionData Attribution { get; set; }
+        public AttributionData Attribution { get; set; } = new AttributionData()
+        {
+            IsOrganic = true,
+        };
         private event AttributionChangedHandler AttributionChanged;
         public event AttributionChangedHandler OnAttributionChanged
         {
