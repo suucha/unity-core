@@ -278,7 +278,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
                 Logger.LogInformation($"Retrying request for rewarded video, AdUnitId: {adUnitId}");
                 RewardedVideoPlayer.RequestRewardedVideo(adUnitId);
             }
-            Logger.LogDebug($"Rewarded video onshown processing completed for AdUnit ID: {adUnitId} @ {placement}");
+            Logger.LogDebug($"Rewarded video onshown processing completed for AdUnit ID: {adUnitId} @ {adCallbackInfo.Placement}");
         }
 
         /// <summary>
