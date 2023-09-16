@@ -215,6 +215,10 @@ namespace SuuchaStudio.Unity.Core
         {
             return SuuchaGlobalMonoBehaviour.Global.AddComponent<T>();
         }
+        public void QueueOnMainThread(Action action , float time = 0f)
+        {
+            SuuchaGlobalMonoBehaviour.Global.QueueOnMainThread(action, time);
+        }
     }
     internal class SuuchaData
     {

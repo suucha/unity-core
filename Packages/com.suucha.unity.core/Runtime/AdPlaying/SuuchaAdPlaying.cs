@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Cysharp.Threading.Tasks;
+using UnityEditor.Experimental.GraphView;
 
 namespace SuuchaStudio.Unity.Core.AdPlaying
 {
@@ -480,6 +481,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
             {
                 Logger.LogError($"On rewarded video shown callback error:{ex.Message}");
             }
+            RequestRewardedVideo(adCallbackInfo.Placement);
         }
         async void RewardedVideoPlayerOnClosedInternal(string adUnitId, AdCallbackInfo adCallbackInfo)
         {
@@ -510,6 +512,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
             {
                 Logger.LogError($"On rewarded video closed callback error:{ex.Message}");
             }
+            RequestRewardedVideo(adCallbackInfo.Placement);
         }
         async void RewardedVideoPlayerOnRevenuePaidInternal(string adUnitId, AdCallbackInfo adCallbackInfo)
         {
@@ -547,6 +550,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
             {
                 Logger.LogError($"On rewarded video revenue paid callback error:{ex.Message}");
             }
+            RequestRewardedVideo(adCallbackInfo.Placement);
         }
 
         async void RewardedVideoPlayerOnLoadedInternal(string adUnitId, AdCallbackInfo adCallbackInfo)
@@ -609,6 +613,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
             {
                 Logger.LogError($"On rewarded video failed to play callback error:{ex.Message}");
             }
+            RequestRewardedVideo(placement);
         }
 
         async void RewardedVideoPlayerOnLoadFailedInternal(string adUnitId, string errorMessage)
@@ -691,6 +696,7 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
             {
                 Logger.LogError($"On rewarded video completed callback error:{ex.Message}");
             }
+            RequestRewardedVideo(adCallbackInfo.Placement);
         }
         #endregion
         private bool InitializeAdPlayerManager()
@@ -702,7 +708,10 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
                 return isInitialled;
             }
             isInitialled = adPlayerManager.Initialize().AsTask().Result;
-            RequestAds();
+            if (isInitialled)
+            {
+                RequestAds();
+            }
             return isInitialled;
         }
         public void EnableAdPlayingEvent(List<AdPlayingEnableEvents> enableEvents, List<AdPlayingEnableEvents> enablePlacementEvents)
@@ -713,25 +722,23 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
         }
         void RequestAds()
         {
-            var adUnitId = adPlayingStrategy.GetRewardedVideoAdUnitId(null, out AdRequestResults adRequestResults);
-            if (!string.IsNullOrEmpty(adUnitId) && !RewardedVideoPlayer.HasRewardedVideo(adUnitId))
-            {
-                RewardedVideoPlayer.RequestRewardedVideo(adUnitId);
-            }
+            RequestRewardedVideo();
+            RequestInterstitialVideo();
 
-            adUnitId = adPlayingStrategy.GetInterstitialVideoAdUnitId(null, out adRequestResults);
-            if (!string.IsNullOrEmpty(adUnitId))
-            {
-                InterstitialVideoPlayer.RequestInterstitialVideo(adUnitId);
-            }
-            adUnitId = adPlayingStrategy.GetBannerAdUnitId(null, out adRequestResults);
+            var adUnitId = adPlayingStrategy.GetBannerAdUnitId(null, out var adRequestResults);
             if (!string.IsNullOrEmpty(adUnitId))
             {
                 BannerPlayer.RequestBanner(adUnitId, BannerPosition.BottomCenter);
             }
         }
+        /// <summary>
+        /// Checks if a rewarded video ad is available for the specified placement.
+        /// </summary>
+        /// <param name="placement">The name of the ad placement.</param>
+        /// <returns>The result of the ad request, indicating whether a rewarded video ad is available.</returns>
         public AdRequestResults HasRewardedVideo(string placement)
         {
+            Logger.LogDebug($"HasRewardedVideo started for placement: {placement}");
             if (!isInitialled)
             {
                 Logger.LogError($"HasRewardedVideo: The advertising SDK is not initialized.");
@@ -740,17 +747,26 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
             var adUnitId = adPlayingStrategy.GetRewardedVideoAdUnitId(placement, out AdRequestResults adRequestResults);
             if (string.IsNullOrEmpty(adUnitId))
             {
+                Logger.LogWarning($"No ad unit ID found for rewarded video, placement: {placement}");
                 return adRequestResults;
             }
             var hasAd = RewardedVideoPlayer.HasRewardedVideo(adUnitId);
             if (hasAd)
             {
+                Logger.LogDebug($"Rewarded video ad available for ad unit ID: {adUnitId}, placement: {placement}");
                 return AdRequestResults.Successful;
             }
+            Logger.LogDebug($"Rewarded video ad not ready for ad unit ID: {adUnitId}, placement: {placement}");
             return AdRequestResults.NotReady;
         }
+        /// <summary>
+        /// Attempts to show a rewarded video ad for the specified placement.
+        /// </summary>
+        /// <param name="placement">The name of the ad placement.</param>
+        /// <returns>The result of the ad request, indicating whether the rewarded video ad was shown or not.</returns>
         public AdRequestResults ShowRewardedVideo(string placement)
         {
+            Logger.LogDebug($"ShowRewardedVideo started for placement: {placement}");
             var adRequestResults = AdRequestResults.Successful;
             if (!isInitialled)
             {
@@ -761,28 +777,44 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
             var adUnitId = adPlayingStrategy.GetRewardedVideoAdUnitId(placement, out adRequestResults);
             if (string.IsNullOrEmpty(adUnitId))
             {
+                Logger.LogWarning($"Has no ad unit ID for rewarded, placement:{placement}");
                 return adRequestResults;
             }
+            Logger.LogDebug($"Ad unit ID for rewarded, placement: {placement}, ad unit ID: {adUnitId}");
             if (RewardedVideoPlayer.HasRewardedVideo(adUnitId))
             {
+                Logger.LogDebug($"Show rewarded video for ad unit ID: {adUnitId}, placement: {placement}");
                 RewardedVideoPlayer.ShowRewardedVideo(adUnitId, placement);
                 return adRequestResults;
             }
             adRequestResults = AdRequestResults.NotReady;
+            Logger.LogWarning($"Rewarded video ad not ready, requesting ad for ad unit ID: {adUnitId}");
             RewardedVideoPlayer.RequestRewardedVideo(adUnitId);
             return adRequestResults;
         }
         public void RequestRewardedVideo(string placement = "")
         {
+            Logger.LogDebug($"RequestRewardedVideo started for placement: {placement}");
             var adUnitId = adPlayingStrategy.GetRewardedVideoAdUnitId(placement, out AdRequestResults adRequestResults);
             if (string.IsNullOrEmpty(adUnitId))
             {
+                Logger.LogWarning($"Has no ad unit ID for rewarded, placement:{placement}, result: {adRequestResults}");
                 return;
             }
-            RewardedVideoPlayer.RequestRewardedVideo(adUnitId);
+            if (!RewardedVideoPlayer.HasRewardedVideo(adUnitId))
+            {
+                Logger.LogDebug($"Requesting rewarded video ad for ad unit ID: {adUnitId}");
+                RewardedVideoPlayer.RequestRewardedVideo(adUnitId);
+            }
         }
+        /// <summary>
+        /// Checks if an interstitial video ad is available for the specified placement.
+        /// </summary>
+        /// <param name="placement">The name of the ad placement.</param>
+        /// <returns>The result of the ad request, indicating whether an ad is available.</returns>
         public AdRequestResults HasInterstitialVideo(string placement)
         {
+            Logger.LogDebug($"HasInterstitialVideo started for placement: {placement}");
             if (!isInitialled)
             {
                 Logger.LogError($"HasInterstitialVideo: The advertising SDK is not initialized.");
@@ -791,18 +823,27 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
             var adUnitId = adPlayingStrategy.GetInterstitialVideoAdUnitId(placement, out AdRequestResults adRequestResults);
             if (string.IsNullOrEmpty(adUnitId))
             {
-                Logger.LogError("Has no ad unit id for interstitial.");
+                Logger.LogWarning($"No ad unit ID found for interstitial video, placement: {placement}");
                 return adRequestResults;
             }
             var hasAd = InterstitialVideoPlayer.HasInterstitialVideo(adUnitId);
             if (hasAd)
             {
+                Logger.LogDebug($"Interstitial video ad available for ad unit ID: {adUnitId}, placement: {placement}");
                 return AdRequestResults.Successful;
             }
+            Logger.LogDebug($"Interstitial video ad not ready for ad unit ID: {adUnitId}, placement: {placement}");
             return AdRequestResults.NotReady;
         }
+        /// <summary>
+        /// Attempts to show an interstitial video ad for the specified placement.
+        /// </summary>
+        /// <param name="placement">The name of the ad placement.</param>
+        /// <returns>The result of the ad request, indicating whether the interstitial video ad was shown or not.</returns>
+
         public AdRequestResults ShowInterstitialVideo(string placement)
         {
+            Logger.LogDebug($"ShowInterstitialVideo started for placement: {placement}");
             var adRequestResults = AdRequestResults.Successful;
             if (!isInitialled)
             {
@@ -812,28 +853,43 @@ namespace SuuchaStudio.Unity.Core.AdPlaying
             var adUnitId = adPlayingStrategy.GetInterstitialVideoAdUnitId(placement, out adRequestResults);
             if (string.IsNullOrEmpty(adUnitId))
             {
-                Logger.LogError("Has no ad unit id for interstitial.");
+                Logger.LogWarning($"No ad unit ID found for interstitial video, placement: {placement}");
                 return adRequestResults;
             }
             if (InterstitialVideoPlayer.HasInterstitialVideo(adUnitId))
             {
+                Logger.LogDebug($"Show interstitial video for ad unit ID: {adUnitId}, placement: {placement}");
                 InterstitialVideoPlayer.ShowInterstitialVideo(adUnitId, placement);
                 return adRequestResults;
             }
             adRequestResults = AdRequestResults.NotReady;
+            Logger.LogWarning($"Interstitial video ad not ready, requesting ad for ad unit ID: {adUnitId}, placement: {placement}");
             InterstitialVideoPlayer.RequestInterstitialVideo(adUnitId);
             return adRequestResults;
         }
+        /// <summary>
+        /// Requests an interstitial video ad for the specified placement.
+        /// </summary>
+        /// <param name="placement">The name of the ad placement.</param>
         public void RequestInterstitialVideo(string placement = "")
         {
+            Logger.LogDebug($"RequestInterstitialVideo started for placement: {placement}");
+
             var adUnitId = adPlayingStrategy.GetInterstitialVideoAdUnitId(placement, out AdRequestResults adRequestResults);
+
             if (string.IsNullOrEmpty(adUnitId))
             {
-                Logger.LogError("Has no ad unit id for interstitial.");
+                Logger.LogWarning($"No ad unit ID found for interstitial, placement: {placement}, results: {adRequestResults}");
                 return;
             }
-            InterstitialVideoPlayer.RequestInterstitialVideo(adUnitId);
+
+            if (!InterstitialVideoPlayer.HasInterstitialVideo(adUnitId))
+            {
+                Logger.LogDebug($"Requesting interstitial video for ad unit ID: {adUnitId}, placement: {placement}");
+                InterstitialVideoPlayer.RequestInterstitialVideo(adUnitId);
+            }
         }
+
         public void ShowBanner(string placement = "")
         {
             if (!isInitialled)
