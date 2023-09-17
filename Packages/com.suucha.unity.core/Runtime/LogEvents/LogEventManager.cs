@@ -47,28 +47,29 @@ namespace SuuchaStudio.Unity.Core.LogEvents
         }
 
         /// <summary>
-        /// Reports a log event to an <see cref="ILogEventReporter"/>.
+        /// Reports a log event to an <see cref="ILogEventReporter"/> and its intercepted events if enabled.
         /// </summary>
         /// <param name="reporter">The reporter to which the log event is reported.</param>
         /// <param name="logEvent">The log event to report.</param>
         private static async UniTask ReportLogEvent(ILogEventReporter reporter, LogEvent logEvent)
         {
-            if (!reporter.IsAllowEventReport(logEvent.Name))
-            {
-                instance.Logger.LogInformation($"Skipped reporting log event '{logEvent.Name}' to reporter '{reporter.Name}' as it's not allowed.");
-                return;
-            }
-            
             await reporter.LogEvent(logEvent.Name, logEvent.Parameters);
             var reportedEventNames = new List<string> { logEvent.Name };
             foreach (var newLogEventName in logEvent.NewNames)
             {
-                if (reporter.IsEnableEventIntercept(newLogEventName.InterceptorName)
-                    && !reportedEventNames.Contains(newLogEventName.Name))
+                if (reporter.IsEnableEventIntercept(newLogEventName.InterceptorName))
                 {
-                    await reporter.LogEvent(newLogEventName.Name, logEvent.Parameters);
-                    reportedEventNames.Add(newLogEventName.Name);
+                    if(reportedEventNames.Contains(newLogEventName.Name))
+                    {
+                        await reporter.LogEvent(newLogEventName.Name, logEvent.Parameters);
+                        reportedEventNames.Add(newLogEventName.Name);
+                    }
                 }
+                else
+                {
+                    instance.Logger.LogInformation($"Event interceptor '{newLogEventName.InterceptorName}' is not enabled, skipping event(name: {newLogEventName.Name}) reporting.");
+                }
+
             }
         }
 

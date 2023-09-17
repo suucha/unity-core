@@ -52,7 +52,7 @@ namespace SuuchaStudio.Unity.Core
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void InitIoc()
         {
-            UnityEngine.Debug.Log("InitIoc started.");
+            UnityEngine.Debug.Log("[SuuchaGlobalMonoBehaviour] DEBUG InitIoc started.");
             var zenjectContainer = new ZenjectContainer();
             zenjectContainer.Build();
             IocContainer.SetContainer(zenjectContainer);
