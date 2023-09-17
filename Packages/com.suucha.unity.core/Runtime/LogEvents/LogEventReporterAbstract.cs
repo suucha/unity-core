@@ -54,46 +54,100 @@ namespace SuuchaStudio.Unity.Core.LogEvents
             EventParameterNameMap = eventParameterNameMap ?? new Dictionary<string, string>();
         }
 
+        /// <summary>
+        /// Determines whether an event with the given name should be allowed for reporting.
+        /// </summary>
+        /// <param name="eventName">The name of the event to check.</param>
+        /// <returns>True if the event should be allowed for reporting; otherwise, false.</returns>
         public bool IsAllowEventReport(string eventName)
         {
-            //如果允许和排除事件名称列表都为空，表示所有事件都要上报
+            Logger.LogDebug($"IsAllowEventReport started for event: {eventName}, reporter name: {Name}");
+            // If both allowed and excluded event name lists are empty, allow all events
             if ((AllowedEventNames == null || AllowedEventNames.Count == 0)
                 && (ExcludedEventNames == null || ExcludedEventNames.Count == 0))
             {
+                Logger.LogDebug("Allowing all events for reporting because both allowed and excluded event name lists are empty.");
                 return true;
             }
-            //如果排除事件名称列表为空则判断允许事件名称列表中是否有该事件
+
+            // If the excluded event name list is empty, check if the event is in the allowed list
             if ((ExcludedEventNames == null || ExcludedEventNames.Count == 0))
             {
-                return AllowedEventNames.MatchUnderscore(eventName);
+                var isAllowed = AllowedEventNames.MatchUnderscore(eventName);
+                if (isAllowed)
+                {
+                    Logger.LogDebug($"Allowing event '{eventName} @ {Name}' for reporting based on the allowed event name list.");
+                }
+                else
+                {
+                    Logger.LogDebug($"Excluding event '{eventName} @ {Name}' from reporting because it's not in the allowed event name list.");
+                }
+                return isAllowed;
             }
-            return !ExcludedEventNames.MatchUnderscore(eventName);
+
+            // If the excluded event name list is not empty, check if the event is excluded
+            var isExcluded = !ExcludedEventNames.MatchUnderscore(eventName);
+            if (isExcluded)
+            {
+                Logger.LogDebug($"Excluding event '{eventName} @ {Name}' from reporting based on the excluded event name list.");
+            }
+            else
+            {
+                Logger.LogDebug($"Allowing event '{eventName} @ {Name}' for reporting because it's not in the excluded event name list.");
+            }
+            return isExcluded;
         }
 
 
+
+        /// <summary>
+        /// Changes the list of allowed event names for reporting.
+        /// </summary>
+        /// <param name="eventNames">The list of event names to allow for reporting.</param>
         public void ChangeAllowedEventNames(List<string> eventNames)
         {
             AllowedEventNames = eventNames ?? new List<string>();
+            Logger.LogDebug($"Changed allowed event names for reporting: {string.Join(", ", AllowedEventNames)}");
         }
 
+        /// <summary>
+        /// Changes the list of excluded event names for reporting.
+        /// </summary>
+        /// <param name="eventNames">The list of event names to exclude from reporting.</param>
         public void ChangeExcludedEventNames(List<string> eventNames)
         {
             ExcludedEventNames = eventNames ?? new List<string>();
+            Logger.LogDebug($"Changed excluded event names for reporting: {string.Join(", ", ExcludedEventNames)}");
         }
 
+        /// <summary>
+        /// Changes the mapping of event names for reporting.
+        /// </summary>
+        /// <param name="nameMap">The dictionary mapping old event names to new event names.</param>
         public void ChangeEventNameMap(Dictionary<string, string> nameMap)
         {
             EventNameMap = nameMap ?? new Dictionary<string, string>();
-
+            Logger.LogDebug("Changed event name mapping for reporting.");
         }
 
+        /// <summary>
+        /// Changes the mapping of event parameter names for reporting.
+        /// </summary>
+        /// <param name="nameMap">The dictionary mapping old parameter names to new parameter names.</param>
         public void ChangeEventParameterNameMap(Dictionary<string, string> nameMap)
         {
             EventParameterNameMap = nameMap ?? new Dictionary<string, string>();
+            Logger.LogDebug("Changed event parameter name mapping for reporting.");
         }
 
+        /// <summary>
+        /// Adds or updates a common event parameter with the specified name and value.
+        /// </summary>
+        /// <param name="eventParameterName">The name of the common event parameter.</param>
+        /// <param name="value">The value to set for the common event parameter.</param>
         public void AddCommonEventParameter(string eventParameterName, string value)
         {
+            Logger.LogDebug($"AddCommonEventParameter started for parameter name: {eventParameterName}, value: {value}");
             if (CommonEventParameters.ContainsKey(eventParameterName))
             {
                 CommonEventParameters[eventParameterName] = value;
@@ -120,6 +174,7 @@ namespace SuuchaStudio.Unity.Core.LogEvents
                 AddedRequiredEventParameterNames.Add(eventParameterName);
                 if (IsAllRequiredEventParametersAdded)
                 {
+                    Logger.LogDebug("All required event parameters added. Reporting cached events.");
                     ReportCachedEvents().GetAwaiter().GetResult();
                 }
             }
@@ -136,15 +191,39 @@ namespace SuuchaStudio.Unity.Core.LogEvents
         }
 
 
+        /// <summary>
+        /// Checks if event intercept is enabled for the specified type name.
+        /// </summary>
+        /// <param name="typeName">The type name to check for event intercept.</param>
+        /// <returns>True if event intercept is enabled for the type name; otherwise, false.</returns>
         public bool IsEnableEventIntercept(string typeName)
         {
-            return EnabledEventInterceptTypeNames.Contains(typeName);
+            bool isInterceptEnabled = EnabledEventInterceptTypeNames.Contains(typeName);
+
+            if (isInterceptEnabled)
+            {
+                Logger.LogDebug($"Event intercept is enabled for type: {typeName} @ {Name}");
+            }
+            else
+            {
+                Logger.LogDebug($"Event intercept is disabled for type: {typeName} @ {Name}");
+            }
+
+            return isInterceptEnabled;
         }
 
+
+        /// <summary>
+        /// Logs an event with the specified name and event parameters, if allowed.
+        /// </summary>
+        /// <param name="name">The name of the event to log.</param>
+        /// <param name="eventParameters">The event parameters to include in the event.</param>
+        /// <returns>A UniTask representing the asynchronous operation.</returns>
         public UniTask LogEvent(string name, Dictionary<string, string> eventParameters)
         {
             if (!IsAllowEventReport(name))
             {
+                Logger.LogInformation($"Event reporting not allowed for event: {name} @ {Name}");
                 return UniTask.CompletedTask;
             }
             var cloneEventParameters = new Dictionary<string, string>();
@@ -178,10 +257,18 @@ namespace SuuchaStudio.Unity.Core.LogEvents
                     Name = eventMapName,
                     Parameters = mapEventParameters
                 });
+                Logger.LogInformation($"Cached event: {eventMapName} @ {Name}");
                 return UniTask.CompletedTask;
             }
+            Logger.LogDebug($"Logging event: {eventMapName} @ {Name}");
             return LogEventInternal(eventMapName, mapEventParameters);
         }
+        /// <summary>
+        /// Logs an event with the specified name and event parameters internally.
+        /// </summary>
+        /// <param name="name">The name of the event to log.</param>
+        /// <param name="eventParameters">The event parameters to include in the event.</param>
+        /// <returns>A UniTask representing the asynchronous operation.</returns>
         protected abstract UniTask LogEventInternal(string name, Dictionary<string, string> eventParameters);
 
         #region Required Event Parameters
@@ -236,6 +323,13 @@ namespace SuuchaStudio.Unity.Core.LogEvents
             return mapName;
         }
 
+        // <summary>
+        /// Enables event intercept for a specific event type.
+        /// </summary>
+        /// <typeparam name="TEventIntercept">The type of event interceptor to enable.</typeparam>
+        /// <remarks>
+        /// Event interceptors are used to intercept and modify log events before they are logged.
+        /// </remarks>
         public void EnableEventIntercept<TEventIntercept>() where TEventIntercept : ILogEventIntercept
         {
             var type = typeof(TEventIntercept);
@@ -243,6 +337,7 @@ namespace SuuchaStudio.Unity.Core.LogEvents
             if (!EnabledEventInterceptTypeNames.Contains(typeName))
             {
                 EnabledEventInterceptTypeNames.Add(typeName);
+                Logger.LogDebug($"Event intercept enabled for type: {typeName}");
             }
         }
         protected class CachableLogEvent

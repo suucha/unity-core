@@ -35,15 +35,24 @@ namespace SuuchaStudio.Unity.Core
                     if (typeof(IAfterSuuchaInit).IsAssignableFrom(type) && !type.IsInterface && !type.IsAbstract)
                     {
                         var instance = Activator.CreateInstance(type) as IAfterSuuchaInit;
-                        instance.Execute();
+                        try
+                        {
+                            instance.Execute();
+                        }
+                        catch (Exception ex)
+                        {
+                            Global.Logger.LogError($"Execute IAfterSuuchaInit(type name: {type.FullName}) error: {ex.Message}");
+                        }
                     }
                 }
             }
+            Global.Logger.LogDebug($"App started.");
             LogEventManager.LogEvent(SuuchaEventNames.AppStart).GetAwaiter().GetResult();
         }
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void InitIoc()
         {
+            UnityEngine.Debug.Log("InitIoc started.");
             var zenjectContainer = new ZenjectContainer();
             zenjectContainer.Build();
             IocContainer.SetContainer(zenjectContainer);
