@@ -46,8 +46,18 @@ namespace SuuchaStudio.Unity.Core
                     }
                 }
             }
-            Global.Logger.LogDebug($"App started.");
-            LogEventManager.LogEvent(SuuchaEventNames.AppStart).GetAwaiter().GetResult();
+
+            try
+            {
+                Global.Logger.LogDebug($"App started.");
+                LogEventManager.LogEvent(SuuchaEventNames.AppStart).GetAwaiter().GetResult();
+            }
+            catch (Exception ex)
+            {
+                Global.Logger.LogError($"Log event {SuuchaEventNames.AppStart} failed, Error: ${ex.Message}");
+            }
+
+            Global.Logger.LogDebug("Suucha inited.");
         }
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void InitIoc()
