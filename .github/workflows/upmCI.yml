@@ -67,6 +67,8 @@ jobs:
 
       - name: UPM Split
         run: |
+          git config --global user.name 'github-bot'
+          git config --global user.email 'github-bot@users.noreply.github.com' 
           git mv Documentation $PKG_ROOT/Documentation~
           git commit -am "Move Documentation to packages Documentation~"
           git push origin --delete upm_${GITHUB_REF##*/} &> /dev/null || echo upm_${GITHUB_REF##*/} branch not found
@@ -86,8 +88,6 @@ jobs:
             git config --global user.email 'github-bot@users.noreply.github.com'
             git commit -am "rename: Samples => Samples~"
           fi
-          git config --global user.name 'github-bot'
-          git config --global user.email 'github-bot@users.noreply.github.com'
           git push -u origin upm_${GITHUB_REF##*/}
         env:
           PKG_ROOT: Packages/com.suucha.unity.core
