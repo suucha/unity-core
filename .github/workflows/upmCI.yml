@@ -68,6 +68,7 @@ jobs:
       - name: UPM Split
         run: |
           git mv Documentation $PKG_ROOT/Documentation~
+          git commit -am "Move Documentation to packages Documentation~"
           git push origin --delete upm_${GITHUB_REF##*/} &> /dev/null || echo upm_${GITHUB_REF##*/} branch not found
           git subtree split -P "$PKG_ROOT" -b upm_${GITHUB_REF##*/}
           git checkout upm_${GITHUB_REF##*/}
