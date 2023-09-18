@@ -19,7 +19,7 @@ Suucha ADKU包使用UPM管理，包存储在npmjs的官方仓库里。
 ### 首先设置Package Manager仓库
 #### 方法一：
 从菜单Edit -> Project Settings 打开Project Settings窗口，然后在左边导航到Package Manager:
-![PackageManager](Packages/com.suucha.unity.core/Documentation/Images/ProjectSettings-PackageManager.png)
+![PackageManager](Documentation/Images/ProjectSettings-PackageManager.png)
 点击Scoped Registries下的加号增加npmjs仓库：
 * 在Name中填入：npmjs
 * 在URL中填入：https://registry.npmjs.org
@@ -42,7 +42,7 @@ Suucha ADKU包使用UPM管理，包存储在npmjs的官方仓库里。
 ### 引入Suucha ADKU包
 #### 方法一
 从菜单Window中选择Package Manager，打开Package Manager窗口，Packages选择My Registries：
-![My Registries](Packages/com.suucha.unity.core/Documentation/Images/MyRegistries.png)
+![My Registries](Documentation/Images/MyRegistries.png)
 然后在搜索框里面输入Suucha，找到需要引入的包，然后点击右下角的安装。
 
 #### 方法二
@@ -124,9 +124,8 @@ Suucha.App.SubAsset("0101", 50);
 //获取资产
 var value = await Suucha.App.GetAsset("0101");
 ```
-
 ### 上报埋点事件
-具体参见：[埋点](Packages/com.suucha.unity.core/Documentation/logEvent.md)
+具体参见：[埋点](Documentation/logEvent.md)
 
 ### 广告播放
-具体参见：[广告播放](Packages/com.suucha.unity.core/Documentation/adplaying.md)
+具体参见：[广告播放](Documentation/adplaying.md)
