@@ -17,6 +17,12 @@ namespace SuuchaStudio.Unity.Core.Assets.EventIntercepts
         public string Name => "AssetEventIntercept";
         public int Order => 10;
 
+        /// <summary>
+        /// Executes the asset parameter interceptor to add asset-related information to the event parameters.
+        /// </summary>
+        /// <param name="eventName">The name of the event.</param>
+        /// <param name="parameters">The existing event parameters.</param>
+        /// <returns>A dictionary containing the updated event parameters with asset information.</returns>
         public async UniTask<Dictionary<string, string>> Execute(string eventName, Dictionary<string, string> parameters)
         {
             Dictionary<string, string> newParameters; 
@@ -38,6 +44,8 @@ namespace SuuchaStudio.Unity.Core.Assets.EventIntercepts
             {
                 var assetsJson = JsonConvert.SerializeObject(assets);
                 newParameters.Add(assetEventParameterName, assetsJson);
+                Logger.LogDebug($"Added asset information to event parameters for event '{eventName}': {assetEventParameterName}");
+
             }
             return newParameters;
         }
@@ -45,5 +53,25 @@ namespace SuuchaStudio.Unity.Core.Assets.EventIntercepts
     public interface IAssetAccessor
     {
         UniTask<List<Asset>> GetAssets();
+    }
+    public class SuuchaAssetAccessor : IAssetAccessor
+    {
+        private static SuuchaAssetAccessor instance;
+        public static SuuchaAssetAccessor Instance
+        {
+            get
+            {
+                if(instance == null)
+                {
+                    instance = new SuuchaAssetAccessor();
+                }
+                return instance;
+            }
+        }
+        public UniTask<List<Asset>> GetAssets()
+        {
+            var assets = Suucha.App.UserAsset.Assets;
+            return UniTask.FromResult(assets);
+        }
     }
 }

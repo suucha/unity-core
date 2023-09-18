@@ -5,10 +5,14 @@ using System.Linq;
 
 namespace SuuchaStudio.Unity.Core.Assets.EventIntercepts
 {
-    public class AssetChangedEventGenerator
+    public class AssetChangedEventGenerator: SuuchaBase
     {
         private readonly List<AssetChangedEventConfiguration> assetChangedEventConfigurations;
         private readonly Dictionary<string, int> maxDigits = new Dictionary<string, int>();
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AssetChangedEventGenerator"/> class with the provided asset change event configurations.
+        /// </summary>
+        /// <param name="assetChangedEventConfigurations">The list of asset change event configurations.</param>
         public AssetChangedEventGenerator(List<AssetChangedEventConfiguration> assetChangedEventConfigurations)
         {
             this.assetChangedEventConfigurations = assetChangedEventConfigurations;
@@ -36,18 +40,25 @@ namespace SuuchaStudio.Unity.Core.Assets.EventIntercepts
                 maxDigits.Add(ace.AssetCode, maxLength);
             }
         }
+        /// <summary>
+        /// Handles asset increased callback by checking configurations and triggering corresponding events.
+        /// </summary>
+        /// <param name="code">The asset code.</param>
+        /// <param name="newValue">The new asset value.</param>
+        /// <param name="oldValue">The old asset value.</param>
         public async void AssetIncreasedCallback(string code, long newValue, long oldValue)
         {
             var config = assetChangedEventConfigurations.FirstOrDefault(a => a.AssetCode == code);
             if (config == null)
             {
+                Logger.LogInformation($"Asset configuration not found for asset code: {code}");
                 return;
             }
             var targets = config.Values.Where(v => v > oldValue && v <= newValue);
             foreach (var target in targets)
             {
                 var value = CountString(code, target);
-                await LogEventManager.LogEvent($"{config.EventName}_{value}", new Dictionary<string, string>());
+                await Suucha.App.LogEvent($"{config.EventName}_{value}", new Dictionary<string, string>());
             }
 
         }
@@ -72,21 +83,28 @@ namespace SuuchaStudio.Unity.Core.Assets.EventIntercepts
     public class AssetChangedEventConfiguration
     {
         /// <summary>
-        /// 资产编码
+        /// Gets or sets the asset code.
         /// </summary>
+        /// <remarks>
+        /// The asset code uniquely identifies the asset being monitored for changes.
+        /// </remarks>
         [JsonProperty("assetCode")]
         public string AssetCode { get; set; }
         /// <summary>
-        /// 事件名称
+        /// Gets or sets the event name.
         /// </summary>
+        /// <remarks>
+        /// The event name describes the type of change event associated with the asset.
+        /// </remarks>
         [JsonProperty("eventName")]
         public string EventName { get; set; }
         /// <summary>
-        /// 监听的资产值列表
+        /// Gets or sets the list of monitored asset values.
         /// </summary>
         /// <remarks>
-        /// 当某资产某次由低到高的变化中包含此列表中的值，则上报一个或多个资产变化事件
-        /// 如：gold_coin_200，表示金币已达到200或超过200
+        /// When the asset undergoes a change from a lower value to a value in this list,
+        /// one or more asset change events will be reported.
+        /// Example: "gold_coin_200" indicates that the gold coin count has reached or exceeded 200.
         /// </remarks>
         [JsonProperty("values")]
         public List<long> Values { get; set; }
